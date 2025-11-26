@@ -54,6 +54,7 @@ if api_key_content:
         st.error(f"❌ Invalid Key or Initialization Error: {e}")
         st.stop()
     
+    # --- TAB 1: VOICE GRADER (SMART AUTO-DETECT) ---
     with tab1:
         st.header("🎤 Voice Grader")
         st.write("Upload ANY .WAV file.")
@@ -114,7 +115,7 @@ if api_key_content:
         st.header("📝 Homework Grader (Powered by Gemini)")
         st.write("Upload a student's handwritten homework (PNG or JPG).")
         
-        homework_file = st.file_uploader("Upload homework image", type=['png', 'jpg', 'jpeg'], key="homework_uploader")
+        homework_file = st.file_uploader("Upload image", type=['png', 'jpg', 'jpeg'], key="homework_uploader")
         
         if homework_file is not None:
             image = Image.open(homework_file)
