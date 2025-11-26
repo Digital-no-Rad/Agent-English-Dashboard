@@ -1,0 +1,8 @@
+streamlit
+google-cloud-speech
+google-cloud-aiplatform
+Pillow
+protobuf
+numpy
+typing-extensions
+attrs

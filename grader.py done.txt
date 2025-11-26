@@ -1,0 +1,177 @@
+import streamlit as st
+from google.cloud import speech
+import json
+import tempfile
+import os
+import wave 
+import contextlib
+from PIL import Image
+import vertexai
+from vertexai.generative_models import GenerativeModel, Part
+import io
+from google.auth.exceptions import DefaultCredentialsError
+from google.oauth2 import service_account 
+
+st.set_page_config(layout="wide")
+st.title("🧑‍🏫 Agent English AI - Teacher Dashboard")
+
+api_key_content = st.text_area(
+    "Paste your Google JSON Key content here to activate all tools:", 
+    height=150
+)
+
+tab1, tab2, tab3 = st.tabs(["🎤 Voice Grader", "📝 Homework Grader", "🍎 Lesson Maker"])
+
+if api_key_content:
+    try:
+        key_data = json.loads(api_key_content)
+        project_id = key_data['project_id']
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as tmp_key:
+            tmp_key.write(api_key_content.encode('utf-8'))
+            key_path = tmp_key.name
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+        
+        speech_client = speech.SpeechClient()
+        
+        creds = service_account.Credentials.from_service_account_info(key_data)
+        
+        try:
+             vertexai.init(project=project_id, credentials=creds)
+        except Exception:
+             vertexai.init(project=project_id, location="us-central1", credentials=creds)
+
+        gemini_model = GenerativeModel("gemini-2.5-flash")
+        
+        st.success("✅ Connected to Google Cloud! All tools are active.")
+        
+    except DefaultCredentialsError:
+        st.error("❌ Authentication Error: The key provided is invalid. Please ensure the key content is correct.")
+        st.stop()
+    except Exception as e:
+        if 'key_path' in locals() and os.path.exists(key_path):
+            os.remove(key_path)
+        st.error(f"❌ Invalid Key or Initialization Error: {e}")
+        st.stop()
+    
+    with tab1:
+        st.header("🎤 Voice Grader")
+        st.write("Upload ANY .WAV file.")
+        
+        voice_file = st.file_uploader("Choose a WAV file", type=['wav'], key="voice_uploader")
+        
+        if voice_file is not None:
+            if st.button("Grade Voice"):
+                with st.spinner("Listening and Grading..."):
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as tmp_audio:
+                        tmp_audio.write(voice_file.getvalue())
+                        audio_file_path = tmp_audio.name
+                    
+                    try:
+                        with contextlib.closing(wave.open(audio_file_path,'rb')) as wf:
+                            sample_rate = wf.getframerate()
+                            channels = wf.getnchannels()
+                        st.info(f"Audio Detected: {sample_rate} Hz, {channels} Channel(s)")
+                        
+                        with open(audio_file_path, "rb") as audio_file:
+                            content = audio_file.read()
+                        
+                        audio = speech.RecognitionAudio(content=content)
+                        config = speech.RecognitionConfig(
+                            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+                            sample_rate_hertz=sample_rate,
+                            audio_channel_count=channels,
+                            language_code="en-US",
+                            enable_word_confidence=True,
+                        )
+                        
+                        response = speech_client.recognize(config=config, audio=audio)
+                        
+                        if not response.results:
+                            st.warning("Google heard silence. Please ensure the WAV file is not empty.")
+                        
+                        for result in response.results:
+                            st.subheader(f"Transcript: \"{result.alternatives[0].transcript}\"")
+                            st.subheader("Word-by-Word Grades:")
+                            col1, col2 = st.columns(2)
+                            with col1: st.write("**Word**")
+                            with col2: st.write("**Score**")
+                            for word_info in result.alternatives[0].words:
+                                with col1: st.write(word_info.word)
+                                with col2:
+                                    score = word_info.confidence * 100
+                                    if score > 90: st.success(f"{score:.0f}")
+                                    elif score > 75: st.warning(f"{score:.0f}")
+                                    else: st.error(f"{score:.0f}")
+                                    
+                    except Exception as e:
+                        st.error(f"Error from Google: {e}")
+                    
+                    if os.path.exists(audio_file_path):
+                        os.remove(audio_file_path)
+
+    with tab2:
+        st.header("📝 Homework Grader (Powered by Gemini)")
+        st.write("Upload a student's handwritten homework (PNG or JPG).")
+        
+        homework_file = st.file_uploader("Upload homework image", type=['png', 'jpg', 'jpeg'], key="homework_uploader")
+        
+        if homework_file is not None:
+            image = Image.open(homework_file)
+            st.image(image, caption="Uploaded Homework", width=400)
+            
+            prompt = st.text_area("What do you want to grade? (e.g., 'Transcribe, correct spelling, and list 3 mistakes')")
+            
+            if st.button("Grade Homework"):
+                if not prompt:
+                    st.warning("Please enter a prompt (what to grade).")
+                else:
+                    with st.spinner("Gemini is grading the homework..."):
+                        try:
+                            img_byte_arr = io.BytesIO()
+                            image.save(img_byte_arr, format=image.format)
+                            img_bytes = img_byte_arr.getvalue()
+                            
+                            image_part = Part.from_data(data=img_bytes, mime_type=f"image/{image.format.lower()}")
+                            
+                            response = gemini_model.generate_content([image_part, prompt])
+                            st.subheader("Gemini's Feedback:")
+                            st.markdown(response.text)
+                        except Exception as e:
+                            st.error(f"Error from Gemini: {e}")
+
+    with tab3:
+        st.header("🍎 Lesson Maker (Powered by Gemini)")
+        st.write("Generate a quick lesson plan or student handout.")
+        
+        topic = st.text_input("Lesson Topic (e.g., 'The difference between simple past and present perfect')")
+        audience = st.text_input("Audience (e.g., '10th grade Korean students, intermediate level')")
+        
+        if st.button("Generate Lesson"):
+            if not topic or not audience:
+                st.warning("Please enter both a topic and an audience.")
+            else:
+                with st.spinner("Gemini is creating your lesson..."):
+                    try:
+                        prompt = f"""
+                        Act as an expert ESL curriculum designer.
+                        Create a simple, one-page lesson handout for the following:
+                        Topic: {topic}
+                        Audience: {audience}
+                        
+                        The handout should include:
+                        1. A simple explanation of the concept.
+                        2. 3-5 clear examples.
+                        3. A short practice exercise (e.g., fill-in-the-blank).
+                        """
+                        response = gemini_model.generate_content(prompt)
+                        st.subheader("Your New Lesson Plan:")
+                        st.markdown(response.text)
+                    except Exception as e:
+                        st.error(f"Error from Gemini: {e}")
+
+if 'key_path' in locals() and os.path.exists(key_path):
+    try:
+        os.remove(key_path)
+    except:
+        pass
