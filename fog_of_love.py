@@ -5,10 +5,13 @@ CHARACTER_DATA = {
     # ... Paste your dictionary here ...
 }
 
+# --- PASTE THIS BELOW YOUR CHARACTER_DATA DICTIONARY ---
+
 st.title("🕵️ Fog of Love: Dossier")
 
 # 1. Player Selection
 player_name = st.text_input("Enter your real name:")
+# Add a default option so the app doesn't error on load
 selected_char = st.selectbox("Assign your character:", ["-- Select --"] + list(CHARACTER_DATA.keys()))
 
 if selected_char != "-- Select --":
@@ -21,7 +24,7 @@ if selected_char != "-- Select --":
     st.write(f"**Your Traits:** {', '.join(char['Traits'])}")
     st.write(f"**What you seek:** {char['Seeks']}")
     
-    # 3. Hidden Info (Expanders are perfect for bars!)
+    # 3. Hidden Info
     with st.expander("👁️ VIEW YOUR SECRET"):
         st.error(f"Secret: {char['Secret']}")
         st.warning(f"Dealbreaker: {char['Dealbreaker']}")
@@ -30,63 +33,35 @@ if selected_char != "-- Select --":
     st.subheader("🔍 Intel on Others")
     for fact in char['Known Intel']:
         st.info(fact)
-# --- PASTE THIS RIGHT AFTER THE 'KNOWN INTEL' LOOP ---
 
+# --- DETECTIVE'S NOTEBOOK ---
 st.markdown("---")
 st.subheader("🕵️ Detective's Notebook")
 
 with st.expander("📝 Open Investigation Log"):
     st.caption("Use this to track your progress. Data resets if you refresh!")
     
-    # 1. Elimination Checklist
     st.write("**❌ Eliminate Suspects:**")
-    
-    # Create 2 columns for the names
     col1, col2 = st.columns(2)
-    # Get all names from the data dictionary
     all_suspects = list(CHARACTER_DATA.keys())
     
-    # Loop through and create a checkbox for each person
+    # This loop creates the checkboxes
     for i, person in enumerate(all_suspects):
         if i % 2 == 0:
             col1.checkbox(person, key=f"elim_{person}")
         else:
             col2.checkbox(person, key=f"elim_{person}")
 
-    # 2. Notes Field
     st.write("**📝 Mission Notes:**")
     st.text_area("Type findings here...", height=150, key="player_notes")
 
-# --- ADD THIS SECTION BEFORE THE ADMIN PANEL ---
-
-st.markdown("---")
-st.subheader("🕵️ Detective's Notebook")
-
-with st.expander("📝 Open Investigation Log"):
-    st.caption("Use this to track your progress. Data resets if you refresh!")
-    
-    # 1. Elimination Checklist
-    st.write("**❌ Eliminate Suspects:**")
-    # We use columns to make the checklist look nice on mobile
-    cols = st.columns(2)
-    options = list(CHARACTER_DATA.keys())
-    
-    for i, person in enumerate(options):
-        # Creates a checkbox for every character
-        cols[i % 2].checkbox(person, key=f"elim_{person}")
-
-    # 2. Notes Field
-    st.write("**📝 Mission Notes:**")
-    st.text_area("Type your findings here...", height=150, key="player_notes")
-# --- PASTE THIS AT THE BOTTOM OF YOUR FILE ---
-
+# --- ADMIN PANEL ---
 st.markdown("---")
 st.header("💘 The Rose Ceremony (Admin Only)")
 
-# Checkbox to hide this area from snooping players
 if st.checkbox("Open Scoring Panel"):
     
-    # The Scoring Logic
+    # Scoring Logic
     MATCH_LOGIC = {
         "AURELIAN": {"optimal": "MIREK", "compatible": ["LYRA", "DORIAN", "JAREK"], "disaster": ["IRIA", "BRYN", "NYSSA"]},
         "BRYN": {"optimal": "KAEL", "compatible": ["MIREK", "NYSSA", "CASSIA"], "disaster": ["JAREK", "ORIN", "AURELIAN"]},
@@ -105,15 +80,14 @@ if st.checkbox("Open Scoring Panel"):
 
     st.write("Enter the Final Couples to see who wins.")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        p1 = st.selectbox("Player 1 Character", ["--"] + list(MATCH_LOGIC.keys()), key="p1")
-    with col2:
-        p2 = st.selectbox("Player 1's Choice", ["Single"] + list(MATCH_LOGIC.keys()), key="p2")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        p1 = st.selectbox("Player 1 Character", ["--"] + list(MATCH_LOGIC.keys()), key="p1_score")
+    with col_b:
+        p2 = st.selectbox("Player 1's Choice", ["Single"] + list(MATCH_LOGIC.keys()), key="p2_score")
 
     if st.button("Calculate Match Score"):
         if p1 != "--":
-            # Logic: Did they pick an Optimal, Compatible, or Disaster?
             score = 0
             result_text = ""
             
