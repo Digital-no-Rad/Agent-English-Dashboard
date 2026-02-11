@@ -1,17 +1,118 @@
 import streamlit as st
 
-# Data from your AI Studio prompt
+# --- 1. THE DATA ---
 CHARACTER_DATA = {
-    # ... Paste your dictionary here ...
+    "AURELIAN": {
+        "Career": "Tech CEO",
+        "Traits": ["Ambitious", "Charismatic", "Ruthless"],
+        "Seeks": "Someone who challenges him",
+        "Secret": "I’m technically bankrupt. My company is a fraud.",
+        "Dealbreaker": "Laziness",
+        "Known Intel": ["BRYN was fired from her last job.", "MIREK is hiding a criminal record."]
+    },
+    "BRYN": {
+        "Career": "Defense Attorney",
+        "Traits": ["Sharp", "Cynical", "Protective"],
+        "Seeks": "Absolute loyalty",
+        "Secret": "I lost a huge case on purpose to save a friend.",
+        "Dealbreaker": "Betrayal",
+        "Known Intel": ["NYSSA is not who she says she is.", "KAEL is cheating on his taxes."]
+    },
+    "CASSIA": {
+        "Career": "Influencer",
+        "Traits": ["Bubbly", "Observant", "Vain"],
+        "Seeks": "Adoration",
+        "Secret": "I’m 10 years older than I claim to be.",
+        "Dealbreaker": "Being ignored",
+        "Known Intel": ["IRIA hates children.", "ELOWEN is actually a spy."]
+    },
+    "DORIAN": {
+        "Career": "Surgeon",
+        "Traits": ["Precise", "Arrogant", "Cultured"],
+        "Seeks": "Perfection",
+        "Secret": "I have a tremor in my hand that I’m hiding.",
+        "Dealbreaker": "Bad hygiene",
+        "Known Intel": ["ORIN is in debt to the mafia.", "AURELIAN is lying about his wealth."]
+    },
+    "ELOWEN": {
+        "Career": "Investigative Journalist",
+        "Traits": ["Curious", "Skeptical", "Intense"],
+        "Seeks": "The Truth",
+        "Secret": "I’m writing an exposé on everyone in this room.",
+        "Dealbreaker": "Lying",
+        "Known Intel": ["LYRA is having an affair.", "CASSIA buys her followers."]
+    },
+    "FEN": {
+        "Career": "Ex-Military",
+        "Traits": ["Quiet", "Alert", "Disciplined"],
+        "Seeks": "Peace",
+        "Secret": "I’m currently AWOL (Absent Without Leave).",
+        "Dealbreaker": "Loud noises",
+        "Known Intel": ["DORIAN malpractice suit was settled out of court.", "MIREK is addicted to gambling."]
+    },
+    "IRIA": {
+        "Career": "Gallery Owner",
+        "Traits": ["Sophisticated", "Critical", "Cold"],
+        "Seeks": "A Muse",
+        "Secret": "I sell forgeries to rich tourists.",
+        "Dealbreaker": "Bad taste",
+        "Known Intel": ["CASSIA is actually broke.", "NYSSA is a government informant."]
+    },
+    "JAREK": {
+        "Career": "Chef",
+        "Traits": ["Passionate", "Volatile", "Creative"],
+        "Seeks": "Passion",
+        "Secret": "I lost my sense of taste after COVID.",
+        "Dealbreaker": "Picky eaters",
+        "Known Intel": ["BRYN defends guilty people knowingly.", "KAEL is planning to leave the country."]
+    },
+    "KAEL": {
+        "Career": "Pilot",
+        "Traits": ["Adventurous", "Flirty", "Unreliable"],
+        "Seeks": "No strings attached",
+        "Secret": "I’m grounded pending a drug test investigation.",
+        "Dealbreaker": "Clinginess",
+        "Known Intel": ["FEN has a fake passport.", "DORIAN is being sued."]
+    },
+    "LYRA": {
+        "Career": "Musician",
+        "Traits": ["Emotional", "Talented", "Dreamy"],
+        "Seeks": "A Soulmate",
+        "Secret": "I stole my hit song from my ex.",
+        "Dealbreaker": "Cruelty",
+        "Known Intel": ["ELOWEN is recording our conversations.", "AURELIAN is about to be arrested."]
+    },
+    "MIREK": {
+        "Career": "Architect",
+        "Traits": ["Visionary", "Stubborn", "Workaholic"],
+        "Seeks": "Legacy",
+        "Secret": "My buildings are structurally unsafe.",
+        "Dealbreaker": "Disorder",
+        "Known Intel": ["AURELIAN is a fraud.", "FEN is dangerous."]
+    },
+    "NYSSA": {
+        "Career": "Hacker",
+        "Traits": ["Rebellious", "Secretive", "Brilliant"],
+        "Seeks": "A challenge",
+        "Secret": "I deleted my own criminal record yesterday.",
+        "Dealbreaker": "Technophobia",
+        "Known Intel": ["IRIA is laundering money.", "ELOWEN knows too much."]
+    },
+    "ORIN": {
+        "Career": "Politician",
+        "Traits": ["Charming", "Manipulative", "Smooth"],
+        "Seeks": "Power",
+        "Secret": "I’m being blackmailed by an anonymous source.",
+        "Dealbreaker": "Scandal",
+        "Known Intel": ["DORIAN killed a patient.", "JAREK is stealing from the restaurant."]
+    }
 }
 
-# --- PASTE THIS BELOW YOUR CHARACTER_DATA DICTIONARY ---
-
+# --- 2. THE APP INTERFACE ---
 st.title("🕵️ Fog of Love: Dossier")
 
-# 1. Player Selection
+# Player Selection
 player_name = st.text_input("Enter your real name:")
-# Add a default option so the app doesn't error on load
 selected_char = st.selectbox("Assign your character:", ["-- Select --"] + list(CHARACTER_DATA.keys()))
 
 if selected_char != "-- Select --":
@@ -20,21 +121,21 @@ if selected_char != "-- Select --":
     st.header(f"Character: {selected_char}")
     st.subheader(f"Occupation: {char['Career']}")
     
-    # 2. Public Traits
+    # Public Traits
     st.write(f"**Your Traits:** {', '.join(char['Traits'])}")
     st.write(f"**What you seek:** {char['Seeks']}")
     
-    # 3. Hidden Info
+    # Hidden Info
     with st.expander("👁️ VIEW YOUR SECRET"):
         st.error(f"Secret: {char['Secret']}")
         st.warning(f"Dealbreaker: {char['Dealbreaker']}")
 
-    # 4. Known Intel
+    # Known Intel
     st.subheader("🔍 Intel on Others")
     for fact in char['Known Intel']:
         st.info(fact)
 
-# --- DETECTIVE'S NOTEBOOK ---
+# --- 3. DETECTIVE'S NOTEBOOK ---
 st.markdown("---")
 st.subheader("🕵️ Detective's Notebook")
 
@@ -42,10 +143,11 @@ with st.expander("📝 Open Investigation Log"):
     st.caption("Use this to track your progress. Data resets if you refresh!")
     
     st.write("**❌ Eliminate Suspects:**")
+    
+    # The Grid Layout for Checkboxes
     col1, col2 = st.columns(2)
     all_suspects = list(CHARACTER_DATA.keys())
     
-    # This loop creates the checkboxes
     for i, person in enumerate(all_suspects):
         if i % 2 == 0:
             col1.checkbox(person, key=f"elim_{person}")
@@ -55,13 +157,12 @@ with st.expander("📝 Open Investigation Log"):
     st.write("**📝 Mission Notes:**")
     st.text_area("Type findings here...", height=150, key="player_notes")
 
-# --- ADMIN PANEL ---
+# --- 4. ADMIN PANEL ---
 st.markdown("---")
 st.header("💘 The Rose Ceremony (Admin Only)")
 
 if st.checkbox("Open Scoring Panel"):
     
-    # Scoring Logic
     MATCH_LOGIC = {
         "AURELIAN": {"optimal": "MIREK", "compatible": ["LYRA", "DORIAN", "JAREK"], "disaster": ["IRIA", "BRYN", "NYSSA"]},
         "BRYN": {"optimal": "KAEL", "compatible": ["MIREK", "NYSSA", "CASSIA"], "disaster": ["JAREK", "ORIN", "AURELIAN"]},
@@ -88,27 +189,17 @@ if st.checkbox("Open Scoring Panel"):
 
     if st.button("Calculate Match Score"):
         if p1 != "--":
-            score = 0
-            result_text = ""
-            
             if p2 == "Single":
-                score = 1
-                result_text = "🦄 Single & Safe (+1)"
+                st.success(f"Result for {p1}: 🦄 Single & Safe (+1)")
             else:
                 data = MATCH_LOGIC[p1]
                 if p2 == data['optimal']:
-                    score = 3
-                    result_text = "⭐ PERFECT MATCH (+3)"
+                    st.success(f"Result for {p1}: ⭐ PERFECT MATCH (+3)")
                 elif p2 in data['compatible']:
-                    score = 2
-                    result_text = "🟢 Compatible (+2)"
+                    st.success(f"Result for {p1}: 🟢 Compatible (+2)")
                 elif p2 in data['disaster']:
-                    score = -2
-                    result_text = "🔴 DISASTER (-2)"
+                    st.error(f"Result for {p1}: 🔴 DISASTER (-2)")
                 else:
-                    score = 0
-                    result_text = "⚪ Neutral (0)"
-            
-            st.success(f"Result for {p1}: {result_text}")
+                    st.info(f"Result for {p1}: ⚪ Neutral (0)")
         else:
             st.error("Please select a character first.")
