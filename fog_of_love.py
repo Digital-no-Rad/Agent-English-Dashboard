@@ -30,8 +30,53 @@ if selected_char != "-- Select --":
     st.subheader("🔍 Intel on Others")
     for fact in char['Known Intel']:
         st.info(fact)
+# --- PASTE THIS RIGHT AFTER THE 'KNOWN INTEL' LOOP ---
 
+    st.markdown("---")
+    st.subheader("🕵️ Detective's Notebook")
+    
+    with st.expander("📝 Open Investigation Log"):
+        st.caption("Use this to track your progress. (Note: Data resets if you refresh the page!)")
+        
+        # 1. Elimination Checklist (Grid Layout)
+        st.write("**❌ Eliminate Suspects:**")
+        col_a, col_b = st.columns(2)
+        
+        # Get list of all characters to make checkboxes
+        all_suspects = list(CHARACTER_DATA.keys())
+        
+        for i, suspect in enumerate(all_suspects):
+            # Put even numbers in Col A, odd in Col B
+            if i % 2 == 0:
+                col_a.checkbox(suspect, key=f"elim_{suspect}")
+            else:
+                col_b.checkbox(suspect, key=f"elim_{suspect}")
 
+        # 2. Notes Field
+        st.write("**📝 Mission Notes:**")
+        st.text_area("Type your findings here...", height=150, key="player_notes")
+
+# --- ADD THIS SECTION BEFORE THE ADMIN PANEL ---
+
+st.markdown("---")
+st.subheader("🕵️ Detective's Notebook")
+
+with st.expander("📝 Open Investigation Log"):
+    st.caption("Use this to track your progress. Data resets if you refresh!")
+    
+    # 1. Elimination Checklist
+    st.write("**❌ Eliminate Suspects:**")
+    # We use columns to make the checklist look nice on mobile
+    cols = st.columns(2)
+    options = list(CHARACTER_DATA.keys())
+    
+    for i, person in enumerate(options):
+        # Creates a checkbox for every character
+        cols[i % 2].checkbox(person, key=f"elim_{person}")
+
+    # 2. Notes Field
+    st.write("**📝 Mission Notes:**")
+    st.text_area("Type your findings here...", height=150, key="player_notes")
 # --- PASTE THIS AT THE BOTTOM OF YOUR FILE ---
 
 st.markdown("---")
